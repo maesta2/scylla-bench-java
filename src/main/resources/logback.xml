@@ -1,0 +1,20 @@
+<configuration>
+  <!-- Suppress verbose driver logs; show only WARN+ from the driver -->
+  <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <target>System.err</target>
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{20} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <!-- ScyllaDB / DataStax driver internals - only warnings -->
+  <logger name="com.datastax" level="WARN"/>
+  <logger name="io.netty"     level="WARN"/>
+
+  <!-- Our benchmark code - INFO level -->
+  <logger name="com.scylladb.bench" level="INFO"/>
+
+  <root level="WARN">
+    <appender-ref ref="CONSOLE"/>
+  </root>
+</configuration>
