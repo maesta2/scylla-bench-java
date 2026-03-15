@@ -1,4 +1,4 @@
-.PHONY: build package clean docker-build docker-run help version
+.PHONY: build package clean docker-build docker-run help version release-tag
 
 # Default ScyllaDB Java driver version (override with: make build DRIVER_VERSION=4.18.0.0)
 DRIVER_VERSION ?= 4.18.0.0
@@ -43,6 +43,24 @@ docker-run: docker-build
 		-mode write -workload sequential -nodes 127.0.0.1 \
 		-partition-count 1000 -clustering-row-count 10 \
 		-concurrency 4 -duration 10s
+
+## release-tag: Create and push a release tag in YYYY.M.D format (example: 2026.3.15)
+## usage: make release-tag [TAG=2026.3.15]
+release-tag:
+	@tag="$(TAG)"; \
+	if [ -z "$$tag" ]; then \
+		y=$$(date +%Y); \
+		m=$$(date +%m); m=$${m#0}; \
+		d=$$(date +%d); d=$${d#0}; \
+		tag="$$y.$$m.$$d"; \
+	fi; \
+	if git rev-parse -q --verify "refs/tags/$$tag" >/dev/null; then \
+		echo "Tag already exists: $$tag"; \
+		exit 1; \
+	fi; \
+	echo "Creating and pushing tag $$tag"; \
+	git tag "$$tag"; \
+	git push origin "$$tag"
 
 ## help: Show this help message
 help:

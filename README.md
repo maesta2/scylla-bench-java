@@ -62,6 +62,18 @@ To build with a specific driver version:
   mvn package -Dscylla.driver.version=<version>
 ```
 
+### Release Tag Format
+
+Use `YYYY.M.D` tags for each release (for example `2026.3.15`).
+
+```bash
+# Create and push today's release tag in YYYY.M.D format
+make release-tag
+
+# Or create and push an explicit tag
+make release-tag TAG=2026.3.15
+```
+
 ## Testing Against a Live Cluster
 
 See [test/TESTING.md](test/TESTING.md) for a step-by-step guide to testing all workload modes against a real ScyllaDB cluster (Docker, ScyllaDB Cloud, or local installation).
