@@ -1,0 +1,4 @@
+0000000000000000000000000000000000000000 9eb024eb35612bf3d2fe2b226c3eff7bc2a4f49d Allen Lee <allen.lee@scylladb.com> 1773528971 +0900	branch: Created from HEAD
+9eb024eb35612bf3d2fe2b226c3eff7bc2a4f49d b6910c2d6b244c88f41825b229435934b111c7bf Allen Lee <allen.lee@scylladb.com> 1773529120 +0900	commit: Step 3: Upgrade Java Version and Core Dependencies - Compile: SUCCESS
+b6910c2d6b244c88f41825b229435934b111c7bf 8a75e8088533ebd6e8ffca5c7ae73f31b374d070 Allen Lee <allen.lee@scylladb.com> 1773529427 +0900	commit: Fix CVE vulnerabilities in lz4-java
+8a75e8088533ebd6e8ffca5c7ae73f31b374d070 48ff569115da468d7ba6d932ffb6708c996e789e Allen Lee <allen.lee@scylladb.com> 1773533299 +0900	commit: Add comprehensive testing documentation and cross-platform performance tuning scripts

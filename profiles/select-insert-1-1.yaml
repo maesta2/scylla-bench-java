@@ -1,0 +1,34 @@
+keyspace: scylla_bench
+
+keyspace_definition: >
+  CREATE KEYSPACE IF NOT EXISTS scylla_bench
+  WITH REPLICATION = {'class': 'NetworkTopologyStrategy', 'replication_factor': 3}
+
+table: test
+
+table_definition: >
+  CREATE TABLE IF NOT EXISTS scylla_bench.test
+  (pk bigint, ck bigint, v blob, PRIMARY KEY(pk, ck))
+  WITH compression = {}
+
+columnspec:
+  - name: pk
+    population: uniform:1..1000000
+  - name: ck
+    population: uniform:1..100
+  - name: v
+    size: fixed:4
+
+insert:
+  partitions: fixed:1
+  batchtype: UNLOGGED
+
+queries:
+  insert:
+    cql: "INSERT INTO scylla_bench.test (pk, ck, v) VALUES (?, ?, ?)"
+    fields: samerow
+    ratio: 1
+  select:
+    cql: "SELECT * FROM scylla_bench.test WHERE pk = ? AND ck = ?"
+    fields: samerow
+    ratio: 1

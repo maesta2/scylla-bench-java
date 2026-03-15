@@ -1,0 +1,7 @@
+Remove hardcoded Java paths from test scripts
+
+- Remove hardcoded user-specific Java path from parallel-launcher.ps1
+- Remove hardcoded user-specific Java path from incremental-tuning.ps1
+- Update shell scripts to use JAVA_HOME/bin/java or 'java' from PATH
+- Make scripts work with generic Java installation
+- Add wrapper script detection in parallel-launcher.ps1

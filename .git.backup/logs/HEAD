@@ -1,0 +1,21 @@
+0000000000000000000000000000000000000000 9eb024eb35612bf3d2fe2b226c3eff7bc2a4f49d Allen Lee <allen.lee@scylladb.com> 1773116443 +0900	commit (initial): Initial commit
+9eb024eb35612bf3d2fe2b226c3eff7bc2a4f49d 0000000000000000000000000000000000000000 Allen Lee <allen.lee@scylladb.com> 1773116613 +0900	Branch: renamed refs/heads/main to refs/heads/main
+9eb024eb35612bf3d2fe2b226c3eff7bc2a4f49d 9eb024eb35612bf3d2fe2b226c3eff7bc2a4f49d Allen Lee <allen.lee@scylladb.com> 1773116613 +0900	Branch: renamed refs/heads/main to refs/heads/main
+9eb024eb35612bf3d2fe2b226c3eff7bc2a4f49d 9eb024eb35612bf3d2fe2b226c3eff7bc2a4f49d Allen Lee <allen.lee@scylladb.com> 1773117183 +0900	checkout: moving from main to dev
+9eb024eb35612bf3d2fe2b226c3eff7bc2a4f49d 9eb024eb35612bf3d2fe2b226c3eff7bc2a4f49d Allen Lee <allen.lee@scylladb.com> 1773528681 +0900	reset: moving to HEAD
+9eb024eb35612bf3d2fe2b226c3eff7bc2a4f49d 9eb024eb35612bf3d2fe2b226c3eff7bc2a4f49d Allen Lee <allen.lee@scylladb.com> 1773528971 +0900	checkout: moving from dev to appmod/java-upgrade-20260314225102
+9eb024eb35612bf3d2fe2b226c3eff7bc2a4f49d b6910c2d6b244c88f41825b229435934b111c7bf Allen Lee <allen.lee@scylladb.com> 1773529120 +0900	commit: Step 3: Upgrade Java Version and Core Dependencies - Compile: SUCCESS
+b6910c2d6b244c88f41825b229435934b111c7bf 8a75e8088533ebd6e8ffca5c7ae73f31b374d070 Allen Lee <allen.lee@scylladb.com> 1773529427 +0900	commit: Fix CVE vulnerabilities in lz4-java
+8a75e8088533ebd6e8ffca5c7ae73f31b374d070 48ff569115da468d7ba6d932ffb6708c996e789e Allen Lee <allen.lee@scylladb.com> 1773533299 +0900	commit: Add comprehensive testing documentation and cross-platform performance tuning scripts
+48ff569115da468d7ba6d932ffb6708c996e789e 48ff569115da468d7ba6d932ffb6708c996e789e Allen Lee <allen.lee@scylladb.com> 1773533374 +0900	reset: moving to HEAD
+48ff569115da468d7ba6d932ffb6708c996e789e 9eb024eb35612bf3d2fe2b226c3eff7bc2a4f49d Allen Lee <allen.lee@scylladb.com> 1773534610 +0900	checkout: moving from appmod/java-upgrade-20260314225102 to main
+9eb024eb35612bf3d2fe2b226c3eff7bc2a4f49d 9bac6986caf74e034ae7d4f5373e91d536fdf156 Allen Lee <allen.lee@scylladb.com> 1773534661 +0900	merge copilot-worktree-2026-03-15T00-09-33: Fast-forward
+9bac6986caf74e034ae7d4f5373e91d536fdf156 8a757263aa249d353cfe28b641abe63bc347de57 Allen Lee <allen.lee@scylladb.com> 1773536145 +0900	commit: Use latest scylla-java-driver; add TESTING.md link in README; generalize user paths and expand Java 21 setup for Linux/macOS
+8a757263aa249d353cfe28b641abe63bc347de57 f47f8ddc4933c09624768206dd48a66d518782f0 Allen Lee <allen.lee@scylladb.com> 1773536418 +0900	commit: Remove QUICK_TEST.md from repo; add .gitignore
+f47f8ddc4933c09624768206dd48a66d518782f0 d10c23dc12198ad2368cc345f7fa99303719860c Allen Lee <allen.lee@scylladb.com> 1773536469 +0900	commit: Remove bench-*.log files from repo; ignore future log files
+d10c23dc12198ad2368cc345f7fa99303719860c 30aa04da12b7420ca73b910b556e124e5bc48a8c Allen Lee <allen.lee@scylladb.com> 1773536571 +0900	commit: Move scripts and TESTING.md into tests/ directory
+30aa04da12b7420ca73b910b556e124e5bc48a8c 9234480b0aad46ba9ed965016b6a947932c65147 Allen Lee <allen.lee@scylladb.com> 1773536679 +0900	commit: Rename tests directory to test
+9234480b0aad46ba9ed965016b6a947932c65147 48de732ff1306283d938b7b813390b0362d247b1 Allen Lee <allen.lee@scylladb.com> 1773536922 +0900	commit: Adopt YYYY.M.D release tag format
+48de732ff1306283d938b7b813390b0362d247b1 efd53e7e0a3a16500944bd40351e9d15de520908 Allen Lee <allen.lee@scylladb.com> 1773537791 +0900	commit: Add wrapper scripts with driver version support
+efd53e7e0a3a16500944bd40351e9d15de520908 2f66daba51770a3730498b06263c4890fdb5e3eb Allen Lee <allen.lee@scylladb.com> 1773539105 +0900	commit: Update test files to support wrapper scripts
+2f66daba51770a3730498b06263c4890fdb5e3eb 4196949da66c355e9a5eaddabbaa20e690d80594 Allen Lee <allen.lee@scylladb.com> 1773539718 +0900	commit: Remove hardcoded Java paths from test scripts
