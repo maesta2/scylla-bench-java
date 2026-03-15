@@ -64,7 +64,7 @@ To build with a specific driver version:
 
 ## Testing Against a Live Cluster
 
-See [TESTING.md](TESTING.md) for a step-by-step guide to testing all workload modes against a real ScyllaDB cluster (Docker, ScyllaDB Cloud, or local installation).
+See [test/TESTING.md](test/TESTING.md) for a step-by-step guide to testing all workload modes against a real ScyllaDB cluster (Docker, ScyllaDB Cloud, or local installation).
 
 ## Docker
 
