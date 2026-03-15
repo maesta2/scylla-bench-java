@@ -17,7 +17,7 @@ A Java port of [scylla-bench](https://github.com/scylladb/scylla-bench) — a be
 
 ### Prerequisites
 
-- Java 11+
+- Java 21+ (Java 11+ supported, Java 21 recommended)
 - Maven 3.6+
 
 ### Build
@@ -447,6 +447,42 @@ CREATE TABLE IF NOT EXISTS scylla_bench.test_counters (
 | Driver version | In go.mod | `-Dscylla.driver.version` at build time |
 | Cloud config | `-cloud-config-path` | Not yet implemented |
 | Host pool policy | `hostpool` | DC-aware (driver default) |
+
+## Performance Tuning
+
+For maximum cluster utilization and throughput optimization, see:
+
+- **[TESTING.md](TESTING.md)** - Complete testing guide with performance tuning section
+- **[incremental-tuning.ps1](incremental-tuning.ps1)** - Script to find optimal concurrency settings
+- **[parallel-launcher.ps1](parallel-launcher.ps1)** - Run multiple instances in parallel for maximum throughput
+
+### Quick Tips
+
+**Single Instance Optimization:**
+```powershell
+java -Xms8g -Xmx16g -XX:+UseG1GC \
+  -jar target/scylla-bench-java.jar \
+  -mode write -workload uniform \
+  -nodes node1,node2,node3 \
+  -concurrency 2000 \
+  -connection-count 32 \
+  -rows-per-request 50 \
+  -duration 10m
+```
+
+**Parallel Instances (Recommended for High Throughput):**
+```powershell
+# Run 6 instances in parallel - can saturate even large clusters
+.\parallel-launcher.ps1 \
+  -Nodes node1,node2,node3 \
+  -Instances 6 \
+  -DurationMinutes 10
+```
+
+**Expected Throughput:**
+- Single instance (default): 5,000-10,000 ops/s
+- Single instance (optimized): 20,000-40,000 ops/s
+- 6 parallel instances: 50,000-150,000+ ops/s
 
 ## Contributing
 
