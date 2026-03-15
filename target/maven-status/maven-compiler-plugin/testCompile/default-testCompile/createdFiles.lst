@@ -1,0 +1,8 @@
+com\scylladb\bench\DataGeneratorTest.class
+com\scylladb\bench\DistributionTest.class
+com\scylladb\bench\RateLimiterTest.class
+com\scylladb\bench\results\ResultConfigurationTest.class
+com\scylladb\bench\results\MergedResultTest.class
+com\scylladb\bench\results\TestResultTest.class
+com\scylladb\bench\workloads\SequentialWorkloadTest.class
+com\scylladb\bench\workloads\TokenRangeTest.class

@@ -1,0 +1,5 @@
+# Created at 2026-03-15T09:23:05.207
+Boot Manifest-JAR contains absolute paths in classpath 'G:\Git\scylla-bench-java.worktrees\copilot-worktree-2026-03-15T00-09-33\target\test-classes'
+Hint: <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+'other' has different root
+
