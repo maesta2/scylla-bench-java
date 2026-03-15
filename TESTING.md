@@ -32,6 +32,7 @@ sudo systemctl start scylla-server
 
 ### 2. Verify Java 21
 
+**Windows (PowerShell):**
 ```powershell
 java -version
 # Should show: openjdk version "21.0.2" or similar
@@ -39,13 +40,37 @@ java -version
 
 If not Java 21, set `JAVA_HOME`:
 ```powershell
-$env:JAVA_HOME = "C:\Users\allen\.jdks\openjdk-21.0.2"
+$env:JAVA_HOME = "C:\Users\<user>\.jdks\openjdk-21.0.2"
+```
+
+**Linux / macOS (bash):**
+```bash
+java -version
+# Should show: openjdk version "21.0.2" or similar
+```
+
+If not Java 21, set `JAVA_HOME`:
+```bash
+export JAVA_HOME=/path/to/jdk-21
+export PATH=$JAVA_HOME/bin:$PATH
+```
+
+On Linux you can also use `update-alternatives` to switch the active JDK:
+```bash
+sudo update-alternatives --config java
+```
+
+On macOS with Homebrew:
+```bash
+brew install openjdk@21
+export JAVA_HOME=$(brew --prefix openjdk@21)
+export PATH=$JAVA_HOME/bin:$PATH
 ```
 
 ### 3. Build the Project
 
 ```powershell
-cd g:\Git\scylla-bench-java
+cd <path>\scylla-bench-java
 mvn clean package -DskipTests
 ```
 

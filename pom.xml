@@ -16,10 +16,11 @@
   <properties>
     <!-- ============================================================
          scylla.driver.version: ScyllaDB Java driver version to use.
-         Override at build time:
+         Defaults to LATEST so every build picks up the newest published
+         release automatically.  Pin to a specific version at build time:
            mvn package -Dscylla.driver.version=4.18.0.0
          ============================================================ -->
-    <scylla.driver.version>4.18.0.0</scylla.driver.version>
+    <scylla.driver.version>LATEST</scylla.driver.version>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>

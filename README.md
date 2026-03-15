@@ -62,6 +62,10 @@ To build with a specific driver version:
   mvn package -Dscylla.driver.version=<version>
 ```
 
+## Testing Against a Live Cluster
+
+See [TESTING.md](TESTING.md) for a step-by-step guide to testing all workload modes against a real ScyllaDB cluster (Docker, ScyllaDB Cloud, or local installation).
+
 ## Docker
 
 ```bash
