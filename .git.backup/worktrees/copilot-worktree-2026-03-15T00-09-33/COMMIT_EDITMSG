@@ -1,5 +1,0 @@
-Remove test reports and compiled classes for various benchmark tests
-
-- Deleted XML report for TokenRangeTest.
-- Removed text reports for DataGeneratorTest, DistributionTest, RateLimiterTest, MergedResultTest, ResultConfigurationTest, TestResultTest, and SequentialWorkloadTest.
-- Deleted compiled class files for DataGeneratorTest, DistributionTest, RateLimiterTest, MergedResultTest, ResultConfigurationTest, TestResultTest, SequentialWorkloadTest, and TokenRangeTest.
