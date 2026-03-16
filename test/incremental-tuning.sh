@@ -25,60 +25,60 @@ fi
 # Parse arguments
 while [[ $# -gt 0 ]]; do
   case $1 in
-    --nodes)
+    -nodes)
       NODES="$2"
       shift 2
       ;;
-    --username)
+    -username)
       USERNAME="$2"
       shift 2
       ;;
-    --password)
+    -password)
       PASSWORD="$2"
       shift 2
       ;;
-    --port)
+    -port)
       PORT="$2"
       shift 2
       ;;
-    --datacenter)
+    -datacenter)
       DATACENTER="$2"
       shift 2
       ;;
-    --duration)
+    -duration)
       TEST_DURATION="$2"
       shift 2
       ;;
-    --jar)
+    -jar)
       JAR_PATH="$2"
       shift 2
       ;;
-    --java)
+    -java)
       JAVA_PATH="$2"
       shift 2
       ;;
-    --help)
-      echo "Usage: $0 --nodes <nodes> [options]"
+    -help|--help)
+      echo "Usage: $0 -nodes <nodes> [options]"
       echo ""
       echo "Required:"
-      echo "  --nodes <nodes>         Comma-separated list of ScyllaDB nodes"
+      echo "  -nodes <nodes>         Comma-separated list of ScyllaDB nodes"
       echo ""
       echo "Optional:"
-      echo "  --username <user>       Username for authentication"
-      echo "  --password <pass>       Password for authentication"
-      echo "  --port <port>           CQL port (default: 9042)"
-      echo "  --datacenter <dc>       Datacenter name (default: datacenter1)"
-      echo "  --duration <seconds>    Test duration per level (default: 30)"
-      echo "  --jar <path>            JAR file path (default: target/scylla-bench-java.jar)"
-      echo "  --java <path>           Java executable path (default: \$JAVA_HOME/java or /usr/bin/java)"
+      echo "  -username <user>       Username for authentication"
+      echo "  -password <pass>       Password for authentication"
+      echo "  -port <port>           CQL port (default: 9042)"
+      echo "  -datacenter <dc>       Datacenter name (default: datacenter1)"
+      echo "  -duration <seconds>    Test duration per level (default: 30)"
+      echo "  -jar <path>            JAR file path (default: PROJECT_ROOT/target/scylla-bench-java.jar)"
+      echo "  -java <path>           Java executable path (default: \$JAVA_HOME/bin/java or java)"
       echo ""
       echo "Example:"
-      echo "  $0 --nodes node1,node2,node3 --username scylla --password mypass --datacenter AWS_EU_WEST_2"
+      echo "  $0 -nodes node1,node2,node3 -username scylla -password mypass -datacenter AWS_EU_WEST_2"
       exit 0
       ;;
     *)
       echo "Unknown option: $1"
-      echo "Use --help for usage information"
+      echo "Use -help for usage information"
       exit 1
       ;;
   esac
@@ -86,8 +86,8 @@ done
 
 # Check required arguments
 if [ -z "$NODES" ]; then
-  echo "ERROR: --nodes is required"
-  echo "Use --help for usage information"
+  echo "ERROR: -nodes is required"
+  echo "Use -help for usage information"
   exit 1
 fi
 

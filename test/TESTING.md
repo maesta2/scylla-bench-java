@@ -355,15 +355,15 @@ chmod +x incremental-tuning.sh
 
 # Run tuning test
 ./incremental-tuning.sh \
-  --nodes node1,node2,node3 \
-  --username scylla \
-  --password mypass \
-  --datacenter AWS_EU_WEST_2 \
-  --port 19042
+  -nodes node1,node2,node3 \
+  -username scylla \
+  -password mypass \
+  -datacenter AWS_EU_WEST_2 \
+  -port 19042
 
 # Or with environment variables
 export JAVA_HOME=/path/to/jdk-21
-./incremental-tuning.sh --nodes 127.0.0.1
+./incremental-tuning.sh -nodes 127.0.0.1
 ```
 
 **Parallel Instance Launcher:**
@@ -374,44 +374,44 @@ chmod +x parallel-launcher.sh
 
 # Run 6 instances in parallel
 ./parallel-launcher.sh \
-  --nodes node1,node2,node3 \
-  --username scylla \
-  --password mypass \
-  --datacenter AWS_EU_WEST_2 \
-  --instances 6 \
-  --duration 10
+  -nodes node1,node2,node3 \
+  -username scylla \
+  -password mypass \
+  -datacenter AWS_EU_WEST_2 \
+  -instances 6 \
+  -duration 10
 
 # Customize resources
 ./parallel-launcher.sh \
-  --nodes 127.0.0.1 \
-  --instances 8 \
-  --concurrency 1500 \
-  --connections 20
+  -nodes 127.0.0.1 \
+  -instances 8 \
+  -concurrency 1500 \
+  -connections 20
 ```
 
 **Script Options:**
 
 Both scripts support these common options:
 
-- `--nodes` - Comma-separated node list (required)
-- `--username` - CQL username
-- `--password` - CQL password
-- `--port` - CQL port (default: 9042)
-- `--datacenter` - Datacenter name (default: datacenter1)
-- `--jar` - JAR file path (default: target/scylla-bench-java.jar)
-- `--java` - Java executable path (default: \/java)
-- `--help` - Show help message
+- `-nodes` - Comma-separated node list (required)
+- `-username` - CQL username
+- `-password` - CQL password
+- `-port` - CQL port (default: 9042)
+- `-datacenter` - Datacenter name (default: datacenter1)
+- `-jar` - JAR file path (default: PROJECT_ROOT/target/scylla-bench-java.jar)
+- `-java` - Java executable path (default: \$JAVA_HOME/bin/java or java)
+- `-help` - Show help message
 
 **parallel-launcher.sh specific options:**
 
-- `--instances` - Number of parallel instances (default: 6)
-- `--duration` - Duration in minutes (default: 10)
-- `--concurrency` - Concurrency per instance (default: 1200)
-- `--connections` - Connections per instance (default: 16)
+- `-instances` - Number of parallel instances (default: 6)
+- `-duration` - Duration in minutes (default: 10)
+- `-concurrency` - Concurrency per instance (default: 1200)
+- `-connections` - Connections per instance (default: 16)
 
 **incremental-tuning.sh specific options:**
 
-- `--duration` - Test duration in seconds per concurrency level (default: 30)
+- `-duration` - Test duration in seconds per concurrency level (default: 30)
 
 **Example Output (Linux/macOS):**
 

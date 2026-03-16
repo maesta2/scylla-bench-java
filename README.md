@@ -543,18 +543,20 @@ Windows PowerShell:
 Linux/macOS:
 ```bash
 ./test/parallel-launcher.sh \
-  node1,node2,node3 \
-  6 \
-  10m
+  -nodes node1,node2,node3 \
+  -instances 6 \
+  -duration 10
 ```
 
 Windows PowerShell:
 ```powershell
 .\test\parallel-launcher.ps1 `
-  -Nodes node1,node2,node3 `
-  -Instances 6 `
-  -DurationMinutes 10
+  -nodes node1,node2,node3 `
+  -instances 6 `
+  -duration 10
 ```
+
+> **Note:** PowerShell parameter names are case-insensitive. You can use `-nodes` or `-Nodes`, `-instances` or `-Instances`, etc.
 
 **Expected Throughput:**
 - Single instance (default): 5,000-10,000 ops/s
