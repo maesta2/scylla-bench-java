@@ -22,13 +22,22 @@ param(
     [int]$TestDuration = 30,
     
     [Parameter(Mandatory=$false)]
-    [string]$JarPath = "target/scylla-bench-java.jar",
+    [string]$JarPath = "",
     
     [Parameter(Mandatory=$false)]
     [string]$JavaPath = "java"
 )
 
 $ErrorActionPreference = "Stop"
+
+# Get script directory and project root
+$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$projectRoot = Split-Path -Parent $scriptDir
+
+# Set default JAR path if not provided
+if ([string]::IsNullOrEmpty($JarPath)) {
+    $JarPath = Join-Path $projectRoot "target\scylla-bench-java.jar"
+}
 
 Write-Host "=====================================" -ForegroundColor Cyan
 Write-Host "Incremental Concurrency Tuning" -ForegroundColor Cyan

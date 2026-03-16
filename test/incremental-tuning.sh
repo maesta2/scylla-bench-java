@@ -4,6 +4,10 @@
 
 set -e
 
+# Get script directory and project root
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
 # Default values
 NODES=""
 USERNAME=""
@@ -11,7 +15,7 @@ PASSWORD=""
 PORT=9042
 DATACENTER="datacenter1"
 TEST_DURATION=30
-JAR_PATH="target/scylla-bench-java.jar"
+JAR_PATH="$PROJECT_ROOT/target/scylla-bench-java.jar"
 if [ -n "$JAVA_HOME" ]; then
   JAVA_PATH="$JAVA_HOME/bin/java"
 else

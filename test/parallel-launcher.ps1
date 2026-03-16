@@ -31,13 +31,22 @@ param(
     [int]$Connections = 16,
     
     [Parameter(Mandatory=$false)]
-    [string]$JarPath = "target/scylla-bench-java.jar",
+    [string]$JarPath = "",
     
     [Parameter(Mandatory=$false)]
     [string]$JavaPath = "java"
 )
 
 $ErrorActionPreference = "Stop"
+
+# Get script directory and project root
+$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$projectRoot = Split-Path -Parent $scriptDir
+
+# Set default JAR path if not provided
+if ([string]::IsNullOrEmpty($JarPath)) {
+    $JarPath = Join-Path $projectRoot "target\scylla-bench-java.jar"
+}
 
 Write-Host "=====================================" -ForegroundColor Cyan
 Write-Host "Parallel Benchmark Launcher" -ForegroundColor Cyan
@@ -56,8 +65,7 @@ Write-Host "  Total Connections: $($Instances * $Connections)"
 Write-Host ""
 
 # Verify JAR exists or find wrapper script
-$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$wrapperPath = Join-Path (Split-Path -Parent $scriptDir) "scylla-bench.ps1"
+$wrapperPath = Join-Path $projectRoot "scylla-bench.ps1"
 $useWrapper = (Test-Path $wrapperPath) -and -not (Test-Path $JarPath)
 
 if ($useWrapper) {
