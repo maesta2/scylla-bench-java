@@ -42,21 +42,27 @@ function Test-Java21 {
 # Build JAR if not present or if DRIVER_VERSION changed
 function Build-Jar {
     $rebuild = $false
+    $cleanBuild = $false
     
     if (-not (Test-Path $JarPath)) {
         $rebuild = $true
     }
     elseif ($DriverVersion -ne "LATEST") {
-        # Rebuild if specific driver version requested
+        # Force clean rebuild if specific driver version requested
         Write-Host "Building with driver version: $DriverVersion"
         $rebuild = $true
+        $cleanBuild = $true
     }
     
     if ($rebuild) {
         Write-Host "Building scylla-bench-java..."
         Push-Location $ScriptDir
         try {
-            mvn package -DskipTests -Dscylla.driver.version="$DriverVersion" -q
+            if ($cleanBuild) {
+                mvn clean package -DskipTests -Dscylla.driver.version="$DriverVersion" -q
+            } else {
+                mvn package -DskipTests -Dscylla.driver.version="$DriverVersion" -q
+            }
         }
         finally {
             Pop-Location

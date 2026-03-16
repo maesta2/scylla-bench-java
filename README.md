@@ -508,16 +508,17 @@ CREATE TABLE IF NOT EXISTS scylla_bench.test_counters (
 
 For maximum cluster utilization and throughput optimization, see:
 
-- **[TESTING.md](TESTING.md)** - Complete testing guide with performance tuning section
-- **[incremental-tuning.ps1](incremental-tuning.ps1)** - Script to find optimal concurrency settings
-- **[parallel-launcher.ps1](parallel-launcher.ps1)** - Run multiple instances in parallel for maximum throughput
+- **[test/TESTING.md](test/TESTING.md)** - Complete testing guide with performance tuning section
+- **[test/incremental-tuning.sh](test/incremental-tuning.sh)** / **[test/incremental-tuning.ps1](test/incremental-tuning.ps1)** - Script to find optimal concurrency settings
+- **[test/parallel-launcher.sh](test/parallel-launcher.sh)** / **[test/parallel-launcher.ps1](test/parallel-launcher.ps1)** - Run multiple instances in parallel for maximum throughput
 
 ### Quick Tips
 
 **Single Instance Optimization:**
-```powershell
-java -Xms8g -Xmx16g -XX:+UseG1GC \
-  -jar target/scylla-bench-java.jar \
+
+Linux/macOS:
+```bash
+./scylla-bench.sh \
   -mode write -workload uniform \
   -nodes node1,node2,node3 \
   -concurrency 2000 \
@@ -526,12 +527,32 @@ java -Xms8g -Xmx16g -XX:+UseG1GC \
   -duration 10m
 ```
 
-**Parallel Instances (Recommended for High Throughput):**
+Windows PowerShell:
 ```powershell
-# Run 6 instances in parallel - can saturate even large clusters
-.\parallel-launcher.ps1 \
-  -Nodes node1,node2,node3 \
-  -Instances 6 \
+.\scylla-bench.ps1 `
+  -mode write -workload uniform `
+  -nodes node1,node2,node3 `
+  -concurrency 2000 `
+  -connection-count 32 `
+  -rows-per-request 50 `
+  -duration 10m
+```
+
+**Parallel Instances (Recommended for High Throughput):**
+
+Linux/macOS:
+```bash
+./test/parallel-launcher.sh \
+  node1,node2,node3 \
+  6 \
+  10m
+```
+
+Windows PowerShell:
+```powershell
+.\test\parallel-launcher.ps1 `
+  -Nodes node1,node2,node3 `
+  -Instances 6 `
   -DurationMinutes 10
 ```
 

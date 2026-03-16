@@ -30,19 +30,25 @@ check_java() {
 # Build JAR if not present or if DRIVER_VERSION changed
 build_jar() {
     local rebuild=false
+    local clean_build=false
     
     if [ ! -f "$JAR_PATH" ]; then
         rebuild=true
     elif [ "$DRIVER_VERSION" != "LATEST" ]; then
-        # Rebuild if specific driver version requested
+        # Force clean rebuild if specific driver version requested
         echo "Building with driver version: $DRIVER_VERSION"
         rebuild=true
+        clean_build=true
     fi
     
     if [ "$rebuild" = true ]; then
         echo "Building scylla-bench-java..."
         cd "$SCRIPT_DIR"
-        mvn package -DskipTests -Dscylla.driver.version="$DRIVER_VERSION" -q
+        if [ "$clean_build" = true ]; then
+            mvn clean package -DskipTests -Dscylla.driver.version="$DRIVER_VERSION" -q
+        else
+            mvn package -DskipTests -Dscylla.driver.version="$DRIVER_VERSION" -q
+        fi
     fi
 }
 
