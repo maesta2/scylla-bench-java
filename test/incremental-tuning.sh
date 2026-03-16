@@ -14,7 +14,7 @@ USERNAME=""
 PASSWORD=""
 PORT=9042
 DATACENTER="datacenter1"
-TEST_DURATION=30
+TEST_DURATION=10
 JAR_PATH="$PROJECT_ROOT/target/scylla-bench-java.jar"
 if [ -n "$JAVA_HOME" ]; then
   JAVA_PATH="$JAVA_HOME/bin/java"
@@ -68,7 +68,7 @@ while [[ $# -gt 0 ]]; do
       echo "  -password <pass>       Password for authentication"
       echo "  -port <port>           CQL port (default: 9042)"
       echo "  -datacenter <dc>       Datacenter name (default: datacenter1)"
-      echo "  -duration <seconds>    Test duration per level (default: 30)"
+      echo "  -duration <seconds>    Test duration per level (default: 10)"
       echo "  -jar <path>            JAR file path (default: PROJECT_ROOT/target/scylla-bench-java.jar)"
       echo "  -java <path>           Java executable path (default: \$JAVA_HOME/bin/java or java)"
       echo ""
@@ -106,9 +106,11 @@ echo -e "${YELLOW}Configuration:${NC}"
 echo "  Nodes: $NODES"
 echo "  Datacenter: $DATACENTER"
 echo "  Port: $PORT"
-echo "  Test Duration: ${TEST_DURATION}s per test"
+echo "  Test Duration: ${TEST_DURATION}s per test (${TEST_DURATION}s × 5 tests = $((TEST_DURATION * 5))s total)"
 echo "  JAR: $JAR_PATH"
 echo "  Java: $JAVA_PATH"
+echo ""
+echo -e "${YELLOW}Testing 5 concurrency levels: 256, 512, 1024, 2048, 4096${NC}"
 echo ""
 
 # Verify JAR exists
@@ -144,7 +146,11 @@ echo ""
 # Results array
 declare -a RESULTS=()
 
+TEST_NUM=0
+TOTAL_TESTS=5
+
 for CONCURRENCY in 256 512 1024 2048 4096; do
+  TEST_NUM=$((TEST_NUM + 1))
   CONNECTIONS=$(( CONCURRENCY / 64 ))
   if [ $CONNECTIONS -lt 16 ]; then CONNECTIONS=16; fi
   if [ $CONNECTIONS -gt 48 ]; then CONNECTIONS=48; fi
@@ -154,28 +160,32 @@ for CONCURRENCY in 256 512 1024 2048 4096; do
   if [ $HEAP -gt 24 ]; then HEAP=24; fi
   MAX_HEAP=$(( HEAP * 2 ))
   
-  echo -e "${YELLOW}[$CONCURRENCY] Testing: connections=$CONNECTIONS, heap=${HEAP}g${NC}"
+  echo -e "${YELLOW}[Test $TEST_NUM/$TOTAL_TESTS] Concurrency=$CONCURRENCY, Connections=$CONNECTIONS, Heap=${HEAP}g${NC}"
+  echo -e "${CYAN}Starting at $(date '+%H:%M:%S')... (will run for ${TEST_DURATION}s)${NC}"
   
-  # Run test
-  OUTPUT=$("$JAVA_PATH" -Xms${HEAP}g -Xmx${MAX_HEAP}g -XX:+UseG1GC \
+  # Run test with timeout (add 10s buffer to test duration)
+  TIMEOUT_DURATION=$((TEST_DURATION + 10))
+  OUTPUT=$(timeout ${TIMEOUT_DURATION} "$JAVA_PATH" -Xms${HEAP}g -Xmx${MAX_HEAP}g -XX:+UseG1GC \
     -jar "$JAR_PATH" \
     "${BASE_ARGS[@]}" \
     -concurrency "$CONCURRENCY" \
     -connection-count "$CONNECTIONS" \
-    2>&1 || true)
+    2>&1 || echo "ERROR: Test timed out or failed")
   
-  # Extract ops/s from last line with ops/s
-  OPS_LINE=$(echo "$OUTPUT" | grep -E '\d+\s+ops/s' | tail -1 || echo "")
+  # Extract ops/s from last line with ops/s (fixed regex)
+  OPS_LINE=$(echo "$OUTPUT" | grep -E '[0-9]+[[:space:]]+ops/s' | tail -1 || echo "")
   
   if [ -n "$OPS_LINE" ]; then
-    echo -e "${GREEN}  Result: $OPS_LINE${NC}"
+    echo -e "${GREEN}  ✓ Completed at $(date '+%H:%M:%S') - Result: $OPS_LINE${NC}"
     
-    # Extract numeric ops/s value
-    OPS_VALUE=$(echo "$OPS_LINE" | grep -oE '[0-9]+\s+ops/s' | grep -oE '^[0-9]+' || echo "0")
+    # Extract numeric ops/s value (fixed regex)
+    OPS_VALUE=$(echo "$OPS_LINE" | grep -oE '[0-9]+[[:space:]]+ops/s' | grep -oE '^[0-9]+' || echo "0")
     
     RESULTS+=("$CONCURRENCY|$CONNECTIONS|$HEAP|$OPS_VALUE")
   else
-    echo -e "${RED}  No ops/s data found${NC}"
+    echo -e "${RED}  ✗ Failed at $(date '+%H:%M:%S') - No ops/s data found${NC}"
+    # Show last few lines for debugging
+    echo "$OUTPUT" | tail -5
   fi
   
   echo ""
