@@ -1,111 +1,61 @@
 #!/bin/bash
 # parallel-launcher.sh
-# Launches multiple scylla-bench-java instances in parallel for maximum cluster utilization
+# Launches multiple scylla-bench instances in parallel for maximum cluster utilization
+#
+# Usage:
+#   ./parallel-launcher.sh -instances <N> [any scylla-bench options]
+#
+# Example:
+#   ./parallel-launcher.sh -instances 6 -mode write -workload uniform -nodes node1,node2 -duration 10m
 
 set -e
 
 # Get script directory and project root
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+WRAPPER="$PROJECT_ROOT/scylla-bench.sh"
 
 # Default values
-NODES=""
-USERNAME=""
-PASSWORD=""
-PORT=9042
-DATACENTER="datacenter1"
 INSTANCES=6
-DURATION_MINUTES=10
-CONCURRENCY=1200
-CONNECTIONS=16
-JAR_PATH="$PROJECT_ROOT/target/scylla-bench-java.jar"
-if [ -n "$JAVA_HOME" ]; then
-  JAVA_PATH="$JAVA_HOME/bin/java"
-else
-  JAVA_PATH="java"
-fi
+BENCH_ARGS=()
 
-# Parse arguments
+# Parse launcher-specific arguments
 while [[ $# -gt 0 ]]; do
   case $1 in
-    -nodes)
-      NODES="$2"
-      shift 2
-      ;;
-    -username)
-      USERNAME="$2"
-      shift 2
-      ;;
-    -password)
-      PASSWORD="$2"
-      shift 2
-      ;;
-    -port)
-      PORT="$2"
-      shift 2
-      ;;
-    -datacenter)
-      DATACENTER="$2"
-      shift 2
-      ;;
     -instances)
       INSTANCES="$2"
       shift 2
       ;;
-    -duration)
-      DURATION_MINUTES="$2"
-      shift 2
-      ;;
-    -concurrency)
-      CONCURRENCY="$2"
-      shift 2
-      ;;
-    -connections)
-      CONNECTIONS="$2"
-      shift 2
-      ;;
-    -jar)
-      JAR_PATH="$2"
-      shift 2
-      ;;
-    -java)
-      JAVA_PATH="$2"
-      shift 2
-      ;;
     -help|--help)
-      echo "Usage: $0 -nodes <nodes> [options]"
+      echo "Usage: $0 -instances <N> [scylla-bench options]"
       echo ""
-      echo "Required:"
-      echo "  -nodes <nodes>         Comma-separated list of ScyllaDB nodes"
+      echo "Launcher Options:"
+      echo "  -instances <n>    Number of parallel instances (default: 6)"
+      echo "  -help             Show this help"
       echo ""
-      echo "Optional:"
-      echo "  -username <user>       Username for authentication"
-      echo "  -password <pass>       Password for authentication"
-      echo "  -port <port>           CQL port (default: 9042)"
-      echo "  -datacenter <dc>       Datacenter name (default: datacenter1)"
-      echo "  -instances <n>         Number of parallel instances (default: 6)"
-      echo "  -duration <minutes>    Duration per instance (default: 10)"
-      echo "  -concurrency <n>       Concurrency per instance (default: 1200)"
-      echo "  -connections <n>       Connections per instance (default: 16)"
-      echo "  -jar <path>            JAR file path (default: PROJECT_ROOT/target/scylla-bench-java.jar)"
-      echo "  -java <path>           Java executable path (default: \$JAVA_HOME/bin/java or java)"
+      echo "All other options are passed directly to scylla-bench-java."
+      echo "Run './scylla-bench.sh -help' to see all available scylla-bench options."
       echo ""
-      echo "Example:"
-      echo "  $0 -nodes node1,node2,node3 -username scylla -password mypass -instances 6"
+      echo "Examples:"
+      echo "  # Run 6 parallel write benchmarks"
+      echo "  $0 -instances 6 -mode write -workload uniform -nodes node1,node2 -duration 10m"
+      echo ""
+      echo "  # Run 4 parallel mixed workloads"
+      echo "  $0 -instances 4 -mode mixed -workload uniform -nodes node1,node2,node3 \\"
+      echo "     -username scylla -password *** -datacenter AWS_EU_WEST_2"
       exit 0
       ;;
     *)
-      echo "Unknown option: $1"
-      echo "Use -help for usage information"
-      exit 1
+      # Collect all other arguments for scylla-bench
+      BENCH_ARGS+=("$1")
+      shift
       ;;
   esac
 done
 
-# Check required arguments
-if [ -z "$NODES" ]; then
-  echo "ERROR: -nodes is required"
-  echo "Use -help for usage information"
+# Check if wrapper exists
+if [ ! -x "$WRAPPER" ]; then
+  echo "ERROR: Wrapper script not found or not executable: $WRAPPER"
   exit 1
 fi
 
@@ -122,29 +72,9 @@ echo -e "${CYAN}=====================================${NC}"
 echo ""
 echo -e "${YELLOW}Configuration:${NC}"
 echo "  Instances: $INSTANCES"
-echo "  Nodes: $NODES"
-echo "  Datacenter: $DATACENTER"
-echo "  Port: $PORT"
-echo "  Duration: ${DURATION_MINUTES}m per instance"
-echo "  Concurrency: $CONCURRENCY per instance"
-echo "  Connections: $CONNECTIONS per instance"
-echo "  Total Concurrency: $((INSTANCES * CONCURRENCY))"
-echo "  Total Connections: $((INSTANCES * CONNECTIONS))"
+echo "  Benchmark args: ${BENCH_ARGS[@]}"
 echo ""
-
-# Verify JAR exists
-if [ ! -f "$JAR_PATH" ]; then
-  echo -e "${RED}ERROR: JAR file not found at $JAR_PATH${NC}"
-  exit 1
-fi
-
-# Calculate memory requirements
-HEAP_PER_INSTANCE=8
-TOTAL_MEMORY=$((INSTANCES * (HEAP_PER_INSTANCE + 2)))
-
-echo -e "${YELLOW}Memory Requirements:${NC}"
-echo "  Per instance: ~${HEAP_PER_INSTANCE}GB heap + 2GB overhead"
-echo "  Total estimated: ~${TOTAL_MEMORY}GB"
+echo -e "${YELLOW}Note: Each instance runs independently with the same arguments.${NC}"
 echo ""
 
 read -p "Continue? (y/n) " -n 1 -r
@@ -163,120 +93,28 @@ rm -f bench-*.log
 
 START_TIME=$(date +%s)
 
-# Function to run a single instance
-run_instance() {
-  local ID=$1
-  local ARGS=(
-    "-Xms4g" "-Xmx8g" "-XX:+UseG1GC"
-    "-jar" "$JAR_PATH"
-    "-mode" "write"
-    "-workload" "uniform"
-    "-nodes" "$NODES"
-    "-port" "$PORT"
-    "-datacenter" "$DATACENTER"
-    "-partition-count" "10000"
-    "-clustering-row-count" "50"
-    "-rows-per-request" "40"
-    "-concurrency" "$CONCURRENCY"
-    "-connection-count" "$CONNECTIONS"
-    "-duration" "${DURATION_MINUTES}m"
-  )
-  
-  if [ -n "$USERNAME" ]; then
-    ARGS+=("-username" "$USERNAME")
-  fi
-  
-  if [ -n "$PASSWORD" ]; then
-    ARGS+=("-password" "$PASSWORD")
-  fi
-  
-  "$JAVA_PATH" "${ARGS[@]}" > "bench-$ID.log" 2>&1
-  echo -e "${GREEN}Instance $ID completed${NC}"
-}
-
-# Launch instances in parallel
+# Launch instances in parallel using background jobs
 for i in $(seq 1 $INSTANCES); do
-  run_instance $i &
-  PIDS[$i]=$!
+  (
+    "$WRAPPER" "${BENCH_ARGS[@]}" > "bench-$i.log" 2>&1
+    echo -e "${GREEN}Instance $i completed${NC}"
+  ) &
 done
 
-# Wait for all instances to complete
-echo -e "${YELLOW}Running... (waiting for all instances to complete)${NC}"
-echo ""
-
-for i in $(seq 1 $INSTANCES); do
-  wait ${PIDS[$i]}
-done
+# Wait for all background jobs
+wait
 
 END_TIME=$(date +%s)
 ELAPSED=$((END_TIME - START_TIME))
-ELAPSED_MINUTES=$(echo "scale=1; $ELAPSED / 60" | bc)
+MINUTES=$((ELAPSED / 60))
+SECONDS=$((ELAPSED % 60))
 
 echo ""
 echo -e "${CYAN}=====================================${NC}"
 echo -e "${CYAN}All Instances Completed${NC}"
 echo -e "${CYAN}=====================================${NC}"
 echo ""
-echo -e "${YELLOW}Total elapsed time: ${ELAPSED_MINUTES} minutes${NC}"
+echo -e "${YELLOW}Total elapsed time: ${MINUTES}m ${SECONDS}s${NC}"
 echo ""
-
-# Aggregate results
-echo -e "${CYAN}Aggregating results...${NC}"
-echo ""
-
-TOTAL_OPS=0
-declare -a INSTANCE_RESULTS=()
-
-for i in $(seq 1 $INSTANCES); do
-  LOG_FILE="bench-$i.log"
-  
-  if [ -f "$LOG_FILE" ]; then
-    echo -e "${YELLOW}--- Instance $i ---${NC}"
-    
-    # Extract last 3 ops/s values and average them
-    OPS_VALUES=$(grep -oE '[0-9]+\s+ops/s' "$LOG_FILE" | grep -oE '^[0-9]+' | tail -3 || echo "")
-    
-    if [ -n "$OPS_VALUES" ]; then
-      AVG_OPS=0
-      COUNT=0
-      
-      while IFS= read -r OPS; do
-        AVG_OPS=$((AVG_OPS + OPS))
-        COUNT=$((COUNT + 1))
-      done <<< "$OPS_VALUES"
-      
-      if [ $COUNT -gt 0 ]; then
-        AVG_OPS=$((AVG_OPS / COUNT))
-        echo -e "${CYAN}  Average ops/s (last 3): $AVG_OPS${NC}"
-        TOTAL_OPS=$((TOTAL_OPS + AVG_OPS))
-        INSTANCE_RESULTS+=("$i|$AVG_OPS")
-      fi
-    else
-      echo -e "${RED}  No ops/s data found${NC}"
-    fi
-  fi
-done
-
-echo ""
-echo -e "${CYAN}=====================================${NC}"
-echo -e "${CYAN}Summary${NC}"
-echo -e "${CYAN}=====================================${NC}"
-echo ""
-
-if [ ${#INSTANCE_RESULTS[@]} -gt 0 ]; then
-  printf "%-10s %-10s %-20s\n" "Instance" "Ops/s" "Log File"
-  printf "%-10s %-10s %-20s\n" "----------" "----------" "--------------------"
-  
-  for RESULT in "${INSTANCE_RESULTS[@]}"; do
-    IFS='|' read -r INST OPS <<< "$RESULT"
-    printf "%-10s %-10s %-20s\n" "$INST" "$OPS" "bench-$INST.log"
-  done
-  
-  echo ""
-  echo -e "${GREEN}${CYAN}Total Throughput: ~$TOTAL_OPS ops/s${NC}${NC}"
-  echo ""
-fi
-
 echo -e "${YELLOW}Log files: bench-1.log through bench-$INSTANCES.log${NC}"
 echo ""
-echo -e "${GREEN}✓ Parallel benchmark complete!${NC}"

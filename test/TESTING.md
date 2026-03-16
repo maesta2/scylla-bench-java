@@ -372,51 +372,40 @@ export JAVA_HOME=/path/to/jdk-21
 # Make script executable
 chmod +x parallel-launcher.sh
 
-# Run 6 instances in parallel
+# Run 6 instances in parallel - write benchmark
 ./parallel-launcher.sh \
+  -instances 6 \
+  -mode write \
+  -workload uniform \
   -nodes node1,node2,node3 \
   -username scylla \
   -password mypass \
   -datacenter AWS_EU_WEST_2 \
-  -instances 6 \
-  -duration 10
+  -duration 10m
 
-# Customize resources
+# Run 4 instances - custom configuration
 ./parallel-launcher.sh \
+  -instances 4 \
+  -mode mixed \
+  -workload uniform \
   -nodes 127.0.0.1 \
-  -instances 8 \
   -concurrency 1500 \
-  -connections 20
+  -connection-count 20 \
+  -duration 5m
 ```
 
-**Script Options:**
+**How It Works:**
 
-Both scripts support these common options:
+The `parallel-launcher.sh` script accepts:
+- **Launcher option:** `-instances <N>` - Number of parallel instances to run (default: 6)
+- **All scylla-bench options:** `-mode`, `-workload`, `-nodes`, `-duration`, etc.
 
-- `-nodes` - Comma-separated node list (required)
-- `-username` - CQL username
-- `-password` - CQL password
-- `-port` - CQL port (default: 9042)
-- `-datacenter` - Datacenter name (default: datacenter1)
-- `-jar` - JAR file path (default: PROJECT_ROOT/target/scylla-bench-java.jar)
-- `-java` - Java executable path (default: \$JAVA_HOME/bin/java or java)
-- `-help` - Show help message
-
-**parallel-launcher.sh specific options:**
-
-- `-instances` - Number of parallel instances (default: 6)
-- `-duration` - Duration in minutes (default: 10)
-- `-concurrency` - Concurrency per instance (default: 1200)
-- `-connections` - Connections per instance (default: 16)
-
-**incremental-tuning.sh specific options:**
-
-- `-duration` - Test duration in seconds per concurrency level (default: 30)
+All scylla-bench options are passed directly to each instance. Run `./scylla-bench.sh -help` to see all available options.
 
 **Example Output (Linux/macOS):**
 
 ```bash
-$ ./parallel-launcher.sh --nodes 192.0.2.1 --username scylla --password *** --instances 4
+$ ./parallel-launcher.sh -instances 4 -mode write -nodes 192.0.2.1 -duration 10m
 
 =====================================
 Parallel Benchmark Launcher
@@ -424,10 +413,7 @@ Parallel Benchmark Launcher
 
 Configuration:
   Instances: 4
-  Nodes: 18.133.174.82
-  Duration: 10m per instance
-  Total Concurrency: 4800
-  Total Connections: 64
+  Benchmark args: -mode write -nodes 192.0.2.1 -duration 10m
 
 Memory Requirements:
   Per instance: ~8GB heap + 2GB overhead

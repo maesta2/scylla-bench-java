@@ -543,20 +543,24 @@ Windows PowerShell:
 Linux/macOS:
 ```bash
 ./test/parallel-launcher.sh \
-  -nodes node1,node2,node3 \
   -instances 6 \
-  -duration 10
+  -mode write \
+  -workload uniform \
+  -nodes node1,node2,node3 \
+  -duration 10m
 ```
 
 Windows PowerShell:
 ```powershell
 .\test\parallel-launcher.ps1 `
-  -nodes node1,node2,node3 `
   -instances 6 `
-  -duration 10
+  -mode write `
+  -workload uniform `
+  -nodes node1,node2,node3 `
+  -duration 10m
 ```
 
-> **Note:** PowerShell parameter names are case-insensitive. You can use `-nodes` or `-Nodes`, `-instances` or `-Instances`, etc.
+> **Note:** The parallel launcher accepts all the same options as scylla-bench, plus `-instances` to set the number of parallel processes. Each instance runs with identical parameters.
 
 **Expected Throughput:**
 - Single instance (default): 5,000-10,000 ops/s
