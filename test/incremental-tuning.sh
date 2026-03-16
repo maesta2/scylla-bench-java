@@ -110,7 +110,12 @@ echo "  Test Duration: ${TEST_DURATION}s per test (${TEST_DURATION}s × 5 tests 
 echo "  JAR: $JAR_PATH"
 echo "  Java: $JAVA_PATH"
 echo ""
-echo -e "${YELLOW}Testing 5 concurrency levels: 256, 512, 1024, 2048, 4096${NC}"
+echo -e "${YELLOW}Testing 5 concurrency levels: 4096, 8192, 16384, 32768, 65536${NC}"
+echo -e "${YELLOW}This tests HIGH concurrency to fully utilize your cluster${NC}"
+echo ""
+echo -e "${CYAN}TIP: Monitor ScyllaDB cluster CPU during tests${NC}"
+echo -e "${CYAN}     Target: 50-80% CPU for optimal throughput${NC}"
+echo -e "${CYAN}     If CPU stays low, increase concurrency further${NC}"
 echo ""
 
 # Verify JAR exists
@@ -149,15 +154,15 @@ declare -a RESULTS=()
 TEST_NUM=0
 TOTAL_TESTS=5
 
-for CONCURRENCY in 256 512 1024 2048 4096; do
+for CONCURRENCY in 4096 8192 16384 32768 65536; do
   TEST_NUM=$((TEST_NUM + 1))
   CONNECTIONS=$(( CONCURRENCY / 64 ))
-  if [ $CONNECTIONS -lt 16 ]; then CONNECTIONS=16; fi
-  if [ $CONNECTIONS -gt 48 ]; then CONNECTIONS=48; fi
+  if [ $CONNECTIONS -lt 48 ]; then CONNECTIONS=48; fi
+  if [ $CONNECTIONS -gt 256 ]; then CONNECTIONS=256; fi
   
   HEAP=$(( CONCURRENCY / 256 ))
-  if [ $HEAP -lt 4 ]; then HEAP=4; fi
-  if [ $HEAP -gt 24 ]; then HEAP=24; fi
+  if [ $HEAP -lt 16 ]; then HEAP=16; fi
+  if [ $HEAP -gt 64 ]; then HEAP=64; fi
   MAX_HEAP=$(( HEAP * 2 ))
   
   echo -e "${YELLOW}[Test $TEST_NUM/$TOTAL_TESTS] Concurrency=$CONCURRENCY, Connections=$CONNECTIONS, Heap=${HEAP}g${NC}"
