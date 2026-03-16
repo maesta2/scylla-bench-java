@@ -14,7 +14,7 @@ USERNAME=""
 PASSWORD=""
 PORT=9042
 DATACENTER="datacenter1"
-TEST_DURATION=10
+TEST_DURATION=60
 JAR_PATH="$PROJECT_ROOT/target/scylla-bench-java.jar"
 if [ -n "$JAVA_HOME" ]; then
   JAVA_PATH="$JAVA_HOME/bin/java"
@@ -68,7 +68,7 @@ while [[ $# -gt 0 ]]; do
       echo "  -password <pass>       Password for authentication"
       echo "  -port <port>           CQL port (default: 9042)"
       echo "  -datacenter <dc>       Datacenter name (default: datacenter1)"
-      echo "  -duration <seconds>    Test duration per level (default: 10)"
+      echo "  -duration <seconds>    Test duration per level (default: 60)"
       echo "  -jar <path>            JAR file path (default: PROJECT_ROOT/target/scylla-bench-java.jar)"
       echo "  -java <path>           Java executable path (default: \$JAVA_HOME/bin/java or java)"
       echo ""
