@@ -170,20 +170,25 @@ for CONCURRENCY in 256 512 1024 2048 4096; do
     "${BASE_ARGS[@]}" \
     -concurrency "$CONCURRENCY" \
     -connection-count "$CONNECTIONS" \
-    2>&1 || echo "ERROR: Test timed out or failed")
+    2>&1 || echo "")
   
-  # Extract ops/s from last line with ops/s (fixed regex)
-  OPS_LINE=$(echo "$OUTPUT" | grep -E '[0-9]+[[:space:]]+ops/s' | tail -1 || echo "")
+  # Parse the output - look for stats lines with format: "53s 503 503 0 ..."
+  # Extract throughput from the second column (ops/s)
+  OPS_LINE=$(echo "$OUTPUT" | grep -E '^[[:space:]]*[0-9]+s[[:space:]]+[0-9]+' | tail -1 || echo "")
   
   if [ -n "$OPS_LINE" ]; then
-    echo -e "${GREEN}  ✓ Completed at $(date '+%H:%M:%S') - Result: $OPS_LINE${NC}"
+    # Extract the ops/s value (second column after the timestamp)
+    OPS_VALUE=$(echo "$OPS_LINE" | awk '{print $2}')
     
-    # Extract numeric ops/s value (fixed regex)
-    OPS_VALUE=$(echo "$OPS_LINE" | grep -oE '[0-9]+[[:space:]]+ops/s' | grep -oE '^[0-9]+' || echo "0")
-    
-    RESULTS+=("$CONCURRENCY|$CONNECTIONS|$HEAP|$OPS_VALUE")
+    if [ -n "$OPS_VALUE" ] && [ "$OPS_VALUE" -gt 0 ] 2>/dev/null; then
+      echo -e "${GREEN}  ✓ Completed at $(date '+%H:%M:%S') - Throughput: ${OPS_VALUE} ops/s${NC}"
+      RESULTS+=("$CONCURRENCY|$CONNECTIONS|$HEAP|$OPS_VALUE")
+    else
+      echo -e "${RED}  ✗ Failed at $(date '+%H:%M:%S') - Could not parse throughput${NC}"
+      echo "$OUTPUT" | tail -5
+    fi
   else
-    echo -e "${RED}  ✗ Failed at $(date '+%H:%M:%S') - No ops/s data found${NC}"
+    echo -e "${RED}  ✗ Failed at $(date '+%H:%M:%S') - No stats data found${NC}"
     # Show last few lines for debugging
     echo "$OUTPUT" | tail -5
   fi
@@ -197,18 +202,17 @@ echo -e "${CYAN}=====================================${NC}"
 echo ""
 
 # Print results table
-printf "%-12s %-12s %-10s %-10s\n" "Concurrency" "Connections" "Heap (GB)" "Ops/s"
-printf "%-12s %-12s %-10s %-10s\n" "------------" "------------" "----------" "----------"
+printf "%-12s %-12s %-10s %-12s %-6s\n" "Concurrency" "Connections" "Heap (GB)" "Ops/s" "Best?"
+printf "%-12s %-12s %-10s %-12s %-6s\n" "------------" "------------" "----------" "------------" "------"
 
 BEST_OPS=0
 BEST_CONCURRENCY=0
 BEST_CONNECTIONS=0
 BEST_HEAP=0
 
+# First pass: find the best
 for RESULT in "${RESULTS[@]}"; do
   IFS='|' read -r CONC CONN HEAP OPS <<< "$RESULT"
-  printf "%-12s %-12s %-10s %-10s\n" "$CONC" "$CONN" "$HEAP" "$OPS"
-  
   if [ $OPS -gt $BEST_OPS ]; then
     BEST_OPS=$OPS
     BEST_CONCURRENCY=$CONC
@@ -217,13 +221,37 @@ for RESULT in "${RESULTS[@]}"; do
   fi
 done
 
+# Second pass: print with highlighting
+for RESULT in "${RESULTS[@]}"; do
+  IFS='|' read -r CONC CONN HEAP OPS <<< "$RESULT"
+  if [ "$CONC" = "$BEST_CONCURRENCY" ] && [ $OPS -eq $BEST_OPS ]; then
+    printf "${GREEN}%-12s %-12s %-10s %-12s %-6s${NC}\n" "$CONC" "$CONN" "$HEAP" "$OPS" "  ✓"
+  else
+    printf "%-12s %-12s %-10s %-12s %-6s\n" "$CONC" "$CONN" "$HEAP" "$OPS" ""
+  fi
+done
+
 if [ $BEST_OPS -gt 0 ]; then
   echo ""
-  echo -e "${GREEN}✓ Recommended settings:${NC}"
-  echo -e "${CYAN}  Concurrency: $BEST_CONCURRENCY${NC}"
-  echo -e "${CYAN}  Connections: $BEST_CONNECTIONS${NC}"
-  echo -e "${CYAN}  Heap: ${BEST_HEAP}g${NC}"
-  echo -e "${CYAN}  Expected throughput: ~$BEST_OPS ops/s${NC}"
+  echo -e "${GREEN}✓ OPTIMAL SETTINGS FOUND:${NC}"
+  echo ""
+  echo -e "${CYAN}  Concurrency:  ${BEST_CONCURRENCY}${NC}"
+  echo -e "${CYAN}  Connections:  ${BEST_CONNECTIONS}${NC}"
+  echo -e "${CYAN}  Heap Size:    ${BEST_HEAP}GB (use -Xms${BEST_HEAP}g -Xmx$((BEST_HEAP * 2))g)${NC}"
+  echo -e "${CYAN}  Throughput:   ~${BEST_OPS} ops/s${NC}"
+  echo ""
+  echo -e "${YELLOW}To use these settings:${NC}"
+  echo -e "  ${GREEN}./scylla-bench.sh -concurrency ${BEST_CONCURRENCY} -connection-count ${BEST_CONNECTIONS} [other options]${NC}"
+  echo ""
+  echo -e "${YELLOW}Or set environment variable:${NC}"
+  echo -e "  ${GREEN}export JAVA_OPTS=\"-Xms${BEST_HEAP}g -Xmx$((BEST_HEAP * 2))g\"${NC}"
+else
+  echo ""
+  echo -e "${RED}✗ No valid results found. All tests failed.${NC}"
+  echo -e "${YELLOW}Troubleshooting:${NC}"
+  echo "  - Verify nodes are reachable: $NODES"
+  echo "  - Check credentials and datacenter name"
+  echo "  - Review error output above"
 fi
 
 echo ""
