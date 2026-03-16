@@ -17,23 +17,15 @@ A Java port of [scylla-bench](https://github.com/scylladb/scylla-bench) — a be
 
 ### Quick Start (No Java Required)
 
-Use the provided wrapper scripts that automatically detect Java 21+ or fall back to Docker:
+Use the provided wrapper script that automatically detects Java 21+ or falls back to Docker:
 
-**Linux/macOS:**
 ```bash
 git clone https://github.com/scylladb/scylla-bench-java
 cd scylla-bench-java/
 ./scylla-bench.sh -mode write -workload sequential -nodes 127.0.0.1 -duration 10s
 ```
 
-**Windows (PowerShell):**
-```powershell
-git clone https://github.com/scylladb/scylla-bench-java
-cd scylla-bench-java
-.\scylla-bench.ps1 -mode write -workload sequential -nodes 127.0.0.1 -duration 10s
-```
-
-The wrapper scripts will:
+The wrapper script will:
 1. Check for Java 21+ locally — if found, build and run the JAR
 2. If Java is not available, automatically use Docker (which includes Java)
 3. If neither is available, show installation links
@@ -43,12 +35,7 @@ The wrapper scripts will:
 Use the `DRIVER_VERSION` environment variable to build with a specific driver version:
 
 ```bash
-# Linux/macOS
 DRIVER_VERSION=4.18.0.0 ./scylla-bench.sh -mode write -workload sequential -nodes 127.0.0.1
-
-# Windows PowerShell
-$env:DRIVER_VERSION="4.18.0.0"
-.\scylla-bench.ps1 -mode write -workload sequential -nodes 127.0.0.1
 ```
 
 If not specified, defaults to `LATEST` (newest published version).
@@ -509,14 +496,13 @@ CREATE TABLE IF NOT EXISTS scylla_bench.test_counters (
 For maximum cluster utilization and throughput optimization, see:
 
 - **[test/TESTING.md](test/TESTING.md)** - Complete testing guide with performance tuning section
-- **[test/incremental-tuning.sh](test/incremental-tuning.sh)** / **[test/incremental-tuning.ps1](test/incremental-tuning.ps1)** - Script to find optimal concurrency settings
-- **[test/parallel-launcher.sh](test/parallel-launcher.sh)** / **[test/parallel-launcher.ps1](test/parallel-launcher.ps1)** - Run multiple instances in parallel for maximum throughput
+- **[test/incremental-tuning.sh](test/incremental-tuning.sh)** - Script to find optimal concurrency settings
+- **[test/parallel-launcher.sh](test/parallel-launcher.sh)** - Run multiple instances in parallel for maximum throughput
 
 ### Quick Tips
 
 **Single Instance Optimization:**
 
-Linux/macOS:
 ```bash
 ./scylla-bench.sh \
   -mode write -workload uniform \
@@ -527,36 +513,14 @@ Linux/macOS:
   -duration 10m
 ```
 
-Windows PowerShell:
-```powershell
-.\scylla-bench.ps1 `
-  -mode write -workload uniform `
-  -nodes node1,node2,node3 `
-  -concurrency 2000 `
-  -connection-count 32 `
-  -rows-per-request 50 `
-  -duration 10m
-```
-
 **Parallel Instances (Recommended for High Throughput):**
 
-Linux/macOS:
 ```bash
 ./test/parallel-launcher.sh \
   -instances 6 \
   -mode write \
   -workload uniform \
   -nodes node1,node2,node3 \
-  -duration 10m
-```
-
-Windows PowerShell:
-```powershell
-.\test\parallel-launcher.ps1 `
-  -instances 6 `
-  -mode write `
-  -workload uniform `
-  -nodes node1,node2,node3 `
   -duration 10m
 ```
 

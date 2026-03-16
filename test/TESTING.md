@@ -4,14 +4,8 @@ This document provides instructions for testing scylla-bench-java against a live
 
 ## Quick Start (No Java Required)
 
-The easiest way to run tests is using the wrapper scripts — **no Java installation needed**! They automatically use Java if available or fall back to Docker.
+The easiest way to run tests is using the wrapper script — **no Java installation needed**! It automatically uses Java if available or falls back to Docker.
 
-**Windows:**
-```powershell
-.\scylla-bench.ps1 -mode write -workload sequential -nodes 127.0.0.1 -duration 10s
-```
-
-**Linux/macOS:**
 ```bash
 ./scylla-bench.sh -mode write -workload sequential -nodes 127.0.0.1 -duration 10s
 ```
@@ -48,9 +42,9 @@ sudo systemctl start scylla-server
 
 ### 2. Choose Your Method
 
-**Option A: Wrapper Scripts (Recommended — No Java Required)**
+**Option A: Wrapper Script (Recommended — No Java Required)**
 
-- Use `scylla-bench.sh` (Linux/macOS) or `scylla-bench.ps1` (Windows)
+- Use `scylla-bench.sh` 
 - Automatically detects Java 21+ or uses Docker
 - No manual setup needed
 
@@ -65,12 +59,6 @@ java -version  # Should show: openjdk version "21.0.2" or similar
 
 If not Java 21, set `JAVA_HOME`:
 
-**Windows:**
-```powershell
-$env:JAVA_HOME = "C:\Users\<user>\.jdks\openjdk-21.0.2"
-```
-
-**Linux/macOS:**
 ```bash
 export JAVA_HOME=/path/to/jdk-21
 export PATH=$JAVA_HOME/bin:$PATH
@@ -86,30 +74,9 @@ mvn clean package -DskipTests
 
 ### Automated Test Suite
 
-Use the provided PowerShell script to test all workload modes:
+The automated test script is not currently available. Use the [Manual Testing](#manual-testing) section below for examples of each workload mode:
 
-**Using wrapper script (no Java required):**
-```powershell
-# From the test directory
-.\test-scylla-cluster.ps1 -ScyllaNodes "127.0.0.1" -UseWrapper
-
-# Test against remote cluster
-.\test-scylla-cluster.ps1 -ScyllaNodes "node1.example.com,node2.example.com" -Datacenter "us-east" -UseWrapper
-```
-
-**Using direct JAR (requires Java 21 and Maven build):**
-```powershell
-# Test against local ScyllaDB
-.\test-scylla-cluster.ps1 -ScyllaNodes "127.0.0.1"
-
-# Test against remote cluster
-.\test-scylla-cluster.ps1 -ScyllaNodes "node1.example.com,node2.example.com" -Datacenter "us-east"
-
-# Longer test duration (30 seconds per test)
-.\test-scylla-cluster.ps1 -ScyllaNodes "127.0.0.1" -TestDuration 30
-```
-
-The script tests:
+Workload modes to test:
 1. ✓ Sequential Write
 2. ✓ Uniform Write
 3. ✓ Timeseries Write
@@ -128,14 +95,8 @@ Choose either wrapper scripts (A) or direct JAR (B):
 
 #### 1. Test Basic Connectivity
 
-**Option A: Using Wrapper Scripts (No Java Required)**
+**Option A: Using Wrapper Script (No Java Required)**
 
-**Windows:**
-```powershell
-.\scylla-bench.ps1 -mode write -workload sequential -nodes 127.0.0.1 -duration 5s -partition-count 100
-```
-
-**Linux/macOS:**
 ```bash
 ./scylla-bench.sh -mode write -workload sequential -nodes 127.0.0.1 -duration 5s -partition-count 100
 ```
@@ -213,12 +174,7 @@ Examples below use wrapper scripts. For direct JAR, replace `./scylla-bench.sh` 
 
 **Using Specific Driver Version:**
 ```bash
-# Linux/macOS
 DRIVER_VERSION=4.18.0.0 ./scylla-bench.sh -mode write -workload sequential -nodes 127.0.0.1
-
-# Windows PowerShell
-$env:DRIVER_VERSION="4.18.0.0"
-.\scylla-bench.ps1 -mode write -workload sequential -nodes 127.0.0.1
 ```
 
 ## Verification Checklist
@@ -240,12 +196,14 @@ All host(s) tried for query failed
 ```
 
 **Solution:** Verify ScyllaDB is running and accessible:
-```powershell
+```bash
 # Test connectivity
-Test-NetConnection -ComputerName 127.0.0.1 -Port 9042
+nc -zv 127.0.0.1 9042
+# or
+telnet 127.0.0.1 9042
 
 # Check ScyllaDB logs (if using Docker)
-docker logs scylla | Select-Object -Last 50
+docker logs scylla | tail -n 50
 ```
 
 ### Wrong Datacenter
@@ -282,9 +240,9 @@ java.lang.OutOfMemoryError: Java heap space
 ```
 
 **Solution:** Increase heap size:
-```powershell
-$env:JAVA_OPTS="-Xmx4g -Xms2g"
-java $env:JAVA_OPTS -jar target\scylla-bench-java.jar ...
+```bash
+export JAVA_OPTS="-Xmx4g -Xms2g"
+java $JAVA_OPTS -jar target/scylla-bench-java.jar ...
 ```
 
 ## Performance Comparison (Java 11 vs Java 21)
@@ -301,13 +259,13 @@ If you have historical Java 11 baseline data, compare:
 
 ### Collecting Metrics
 
-```powershell
+```bash
 # Run with latency measurement
-java -jar target\scylla-bench-java.jar `
-  -mode read -workload uniform `
-  -nodes 127.0.0.1 `
-  -duration 60s `
-  -measure-latency `
+java -jar target/scylla-bench-java.jar \
+  -mode read -workload uniform \
+  -nodes 127.0.0.1 \
+  -duration 60s \
+  -measure-latency \
   -hdr-latency-file latency.hdr
 
 # Results will include percentile latencies
@@ -444,11 +402,10 @@ Total Throughput: ~72593 ops/s
 ✓ Parallel benchmark complete!
 ```
 
-### Cross-Platform Notes
+### Platform Notes
 
 **Java Path:**
-- **Windows:** Use full path or set `\C:\Users\allen\.jdks\openjdk-21.0.2`
-- **Linux/macOS:** Use `export JAVA_HOME=/path/to/jdk-21` or let scripts use system Java
+- Use `export JAVA_HOME=/path/to/jdk-21` or let scripts use system Java
 
 **Memory:**
 - Scripts automatically calculate heap based on concurrency
