@@ -13,13 +13,22 @@ param(
     [int]$TestDuration = 10,
     
     [Parameter(Mandatory=$false)]
-    [string]$JarPath = "target/scylla-bench-java.jar",
+    [string]$JarPath = "",
     
     [Parameter(Mandatory=$false)]
     [switch]$UseWrapper = $false
 )
 
 $ErrorActionPreference = "Stop"
+
+# Get script directory and project root
+$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$projectRoot = Split-Path -Parent $scriptDir
+
+# Set default JAR path if not provided
+if ([string]::IsNullOrEmpty($JarPath)) {
+    $JarPath = Join-Path $projectRoot "target\scylla-bench-java.jar"
+}
 
 Write-Host "====================================" -ForegroundColor Cyan
 Write-Host "ScyllaDB Verification Tests" -ForegroundColor Cyan
@@ -32,8 +41,7 @@ Write-Host "  Test Duration: ${TestDuration}s per test"
 Write-Host ""
 
 # Detect if wrapper script is available
-$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$wrapperPath = Join-Path (Split-Path -Parent $scriptDir) "scylla-bench.ps1"
+$wrapperPath = Join-Path $projectRoot "scylla-bench.ps1"
 $useWrapperScript = $UseWrapper -or (Test-Path $wrapperPath)
 
 if ($useWrapperScript -and (Test-Path $wrapperPath)) {
